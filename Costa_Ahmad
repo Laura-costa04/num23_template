@@ -1,0 +1,116 @@
+% Abgabe von: laura.costa(maria-laura.costa@student.uni-tuebingen.de),
+% Shafi Achmad (shafi.achmad@student.uni-tuebingen.de)
+
+% Implementierung der Funktion QRzer(A),wobei Q der orthogonale Matrix ist
+% und R eien rechte obere Dreiecksmatx ist.Die Funktion implementiert eine
+% Matrix A mit der Form (m*n) mit m>= n und Rang(A) gleich n ist und mit
+% A=QR aufgerufen wird.
+
+% Um die QR-Zerlegung zu implementieren , wird der Housholder-Alhorithmus
+% verwendet:
+
+function[Q,R]=QRzer(A)
+[m,n]=size(A);
+Q=eye(m);
+for k=1:n
+    x=A(k:m,k);
+    t=zeros(lenght(x),1);
+    u=sigh(x(1))*norm(x)*t+x;
+    u=u/norm(u);
+    A(k:m,k:n)=A(k:m,k:n)-2*u*(u'*A(k:m,k:n));
+    Q(k:m,:)=Q(k:m,:)-2*u*(u'*Q(k:m,:));
+end
+R=A(1:n,:);
+end
+
+%Aufgabe b)
+% Abgabe von: laura.costa(maria-laura.costa@student.uni-tuebingen.de),
+% Shafi Achmad (shafi.achmad@student.uni-tuebingen.de)
+
+%Wir implementieren die Funktion QRer_loesen(Q,R,b) mithilfe der
+%Rückwärtssubstituion, indem Q und R Matrizen sind sowie b ein Vektor.
+% Dabei wird die Lösung x berechnet im linearen Gleichungssystem QRx=b.
+
+function[x]=QRzer_loesen(Q,R,b)
+[n]=size(R,2);
+y=Q*b;
+x=zeros(n,1);
+for i =n:-1:1
+    x(i)=y(i)/R(i,i);
+    y(1:i-1)=y(1:i-1)-R(1:i-1,i)*x(i);
+end 
+end
+
+%Aufgabe c)
+% Abgabe von: laura.costa(maria-laura.costa@student.uni-tuebingen.de),
+% Shafi Achmad (shafi.achmad@student.uni-tuebingen.de)
+
+
+% Berechnet unter der Verwendung der Funktionen 
+% QRzer.m und QRzer_loesen.m geeignete Koeffizienten
+% y_j (j=1,...,5), so dass die gegebene Funktion eine 
+% Ausgleichskurve der gegeben Messdaten im Sinne der kleinsten 
+% Fehlerquadrate.
+% Diese Ausgleichskurve wird dann in einem Schaubild dargestellt.
+
+% Input: Messdaten, Funktionen z(n) (n=1,...,5), Vektor b
+% Output: Schaubild mit Ausgleichskurve und gegebenen Messdaten 
+
+
+% Initalisierung
+
+b = [100; 14; 61; 68; 60; 35; 22; 80; 90; 105];
+
+% Gegebenen Messdaten x_i und 
+% bei der Berechung von f(x) die Auswertungspunkte
+x = (0.1:0.1:1.0).';
+
+% Gegeben Funktionen z_n (n=1,..,5)
+z_1 = @(x) x^2;
+z_2 = @(x) x^4;
+z_3 = @(x) 1/x^2;
+z_4 = @(x) exp(-(x-1));
+z_5 = @(x) sin(2*pi*x);
+
+z = {z_1 z_2 z_3 z_4 z_5};
+
+A = zeros(10,5);
+
+
+% Berechung der Matrix A, die für die Berechnung von y benötigt wird
+
+for i=1:10
+    A(i,:) = [z{1}(x(i)); z{2}(x(i)); z{3}(x(i)); z{4}(x(i)); z{5}(x(i))];
+end
+
+
+% Berechnung von y 
+
+[Q,R] = QRzer(A);
+[y] = QRzer_loesen(Q,R,b);
+
+
+% Berechnung der Funktion f(x) 
+% bzw. wertet die Funktionen in allen Auswertungspunkte aus
+
+funk_f = zeros(length(x),1);
+
+for j = 1:5
+   for i = 1:length(x)
+        funk_f(i) = funk_f(i)+y(j)*z{j}(x(i));
+    end
+end
+
+
+% Messdaten werden im Schaubild dargestellt
+plot(x,b,'x'); 
+
+% Garantiert, dass nochmals in dieselbe Figur geplottet wird
+hold on;
+
+% Darstellung der Ausgleichskurve 
+plot(x,funk_f);
+
+% Beschriftung im Schaubild
+legend('Messdaten', 'Ausgleichskurve');
+
